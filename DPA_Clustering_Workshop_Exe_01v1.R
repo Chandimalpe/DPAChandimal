@@ -1,77 +1,72 @@
 help()
-x=2
-brainData = read.csv("Brain Size Data.csv", header = TRUE)
-mean(brainData$Height)
-median(brainData$Height)
-mode(brainData$Height)
-mymode <- function(x) {
-  uniqx <- unique(x)
-  uniqx[which.max(tabulate(match(x, uniqx)))]
-}
-mymode(brainData$Height)
-midrange = (max(brainData$Height) - min(brainData$Height))/2
-midrange
-mean(brainData$Weight)
+install.packages("party")
+library(party)
+head(wine)
 
-median(brainData$Weight)
+wine.f=wine
+wine.f$X1<- NULL
 
-mode(brainData$Weight)
+View(wine.f)
 
-mymodew <- function(x) {
-  uniqx <- unique(x)
-  uniqx[which.max(tabulate(match(x, uniqx)))]
-}
-mymodew(brainData$Weight)
-midrangew = (max(brainData$Weight) - min(brainData$Weight))/2
-midrangew
+#Change column names to actual features of wine from the chemical analysis
 
-mean(brainData$VIQ)
+colnames(wine)<-c("Type","Alcohol","Malic acid","Ash","Alcalinity of ash","Magnesium",
+                  "Total phenols","Flavanoids","Nonflavanoid phenols","Proanthocyanins",
+                  "Color intensity","Hue","OD280/OD315 of diluted wines","Proline")
 
-median(brainData$VIQ)
-mode(brainData$VIQ)
-mymodeviq <- function(x) {
-  uniqx <- unique(x)
-  uniqx[which.max(tabulate(match(x, uniqx)))]
-}
-mymodeviq(brainData$VIQ)
-midrangeviq = (max(brainData$VIQ) - min(brainData$VIQ))/2
-midrangeviq
+colnames(wine.f)<-c("Alcohol","Malic acid","Ash","Alcalinity of ash","Magnesium",
+                  "Total phenols","Flavanoids","Nonflavanoid phenols","Proanthocyanins",
+                  "Color intensity","Hue","OD280/OD315 of diluted wines","Proline")
+View(wine)
 
-mean(brainData$PIQ)
+wine.stand <- scale(wine.f[-1])
+View(wine.stand)
+results <- kmeans(wine.stand,3)
+attributes(results)
 
-median(brainData$PIQ)
-mode(brainData$PIQ)
-mymodepiq <- function(x) {
-  uniqx <- unique(x)
-  uniqx[which.max(tabulate(match(x, uniqx)))]
-}
-mymodepiq(brainData$PIQ)
-midrangepiq = (max(brainData$PIQ) - min(brainData$PIQ))/2
-midrangepiq
+results$centers
 
-mean(brainData$MRI_Count)
+head(wine)
+colnames(wine)<-c("Type","Alcohol","Malic acid","Ash","Alcalinity of ash","Magnesium",
+                  "Total phenols","Flavanoids","Nonflavanoid phenols","Proanthocyanins",
+                  "Color intensity","Hue","OD280/OD315 of diluted wines","Proline")
 
-median(brainData$MRI_Count)
-mode(brainData$MRI_Count)
-mymodemricount <- function(x) {
-  uniqx <- unique(x)
-  uniqx[which.max(tabulate(match(x, uniqx)))]
-}
-mymodemricount(brainData$MRI_Count)
-midrangemricount = (max(brainData$MRI_Count) - min(brainData$MRI_Count))/2
-midrangemricount
+head(wine)
 
-plot(brainData)
+table(wine$Type, results$cluster)
+plot(wine.f[,2:13])
 
-dis = dist(Brain_Size_Data[2:4], method="euclidean") #Euclidean distance between points
+dis = dist(wine.f[1:13], method="euclidean")
 
-hcBrainAve = hclust(dis, method="ave") #Group average as similarity measure
-hcBrainWard = hclust(dis, method="ward.D") #Ward's method as similarity measure
+hcattrAve = hclust(dis, method="ave") 
+hcattrWard = hclust(dis, method="ward.D")
+
 par(mfcol=c(1,2))
-plot(hcBrainAve, hang=-1, cex.main = 0.75, cex.axis = 0.5)
-rect.hclust(hcBrainAve, k=2, border="green")
-plot(hcBrainWard, hang=-1, cex.main = 0.75, cex.axis = 0.5)
-rect.hclust(hcBrainWard, k=2, border="green")
+
+plot(hcattrAve, hang=-1, cex.main = 0.75, cex.axis = 0.5)
+
+rect.hclust(hcattrAve, k=3, border="green")
+
+plot(hcattrWard, hang=-1, cex.main = 0.75, cex.axis = 0.5)
+
+rect.hclust(hcattrWard, k=3, border="green")
+
+hcwineAveCut = cutree(hcattrAve, 3)
+hcwineAveCut
+
+hcattrWardcut = cutree(hcattrWard,3)
+par(mfcol=c(1,2))
+plot(wine.f[,1:2], col=hcwineAveCut, cex.main=0.75)
+plot(wine.f[,1:2], col=hcwineAveCut, cex.main=0.75)
+
+dis = dist(wine.f[1:13], method="euclidean")
+
+hcattrWard = hclust(dis, method="ward.D") 
+plot(hcattrWard, hang=-1, labels=wine$Type, cex.main = 0.75, cex.axis = 0.5)
+rect.hclust(hcattrWard, k=3, border="blue")
+
+hcattrWardcut = cutree(hcattrWard, k=3)
+table(wine$Type, hcattrWardcut)
 
 
 
